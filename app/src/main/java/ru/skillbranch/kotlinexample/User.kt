@@ -29,7 +29,7 @@ class User private constructor(
 
     private var phone: String? = null
         set(value) {
-            field = value?.replace("[^\\d]".toRegex(), "")
+            field = value?.replace("[^+\\d]".toRegex(), "")
         }
 
     private var _login: String? = null
@@ -67,10 +67,7 @@ class User private constructor(
         rawPhone: String
     ) : this(firstName, lastName, rawPhone = rawPhone, meta = mapOf("auth" to "sms")) {
         println("Secondary phone constructor")
-        val code = generateAccessCode()
-        passwordHash = encrypt(code)
-        accessCode = code
-        sendAccessCodeToUser(rawPhone, code)
+        requestAccessCode()
     }
 
     init {
@@ -83,15 +80,24 @@ class User private constructor(
         login = email ?: phone!!
 
         userInfo = """
-            firstName = $firstName
-            lastName = $lastName
-            login = $login
-            fullName = $fullName
-            initials = $initials
-            email = $email
-            phone = $phone
-            meta = $meta
+            firstName: $firstName
+            lastName: $lastName
+            login: $login
+            fullName: $fullName
+            initials: $initials
+            email: $email
+            phone: $phone
+            meta: $meta
         """.trimIndent()
+    }
+
+    fun requestAccessCode() {
+        val code = generateAccessCode()
+        passwordHash = encrypt(code)
+        accessCode = code
+        phone?.let {
+            sendAccessCodeToUser(it, code)
+        }
     }
 
     fun checkPassword(pass: String) = encrypt(pass) == passwordHash
