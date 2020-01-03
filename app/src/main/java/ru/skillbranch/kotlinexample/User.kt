@@ -69,8 +69,9 @@ class User private constructor(
     constructor(
         firstName: String,
         lastName: String?,
-        rawPhone: String
-    ) : this(firstName, lastName, rawPhone = rawPhone, meta = mapOf("auth" to "sms")) {
+        rawPhone: String,
+        import: Boolean = false
+    ) : this(firstName, lastName, rawPhone = rawPhone, meta = if (import) mapOf("src" to "csv") else mapOf("auth" to "sms")) {
         println("Secondary phone constructor")
         requestAccessCode()
     }
@@ -180,7 +181,7 @@ class User private constructor(
             val phone: String? = params.getOrNull(3)
 
             return when {
-                !phone.isNullOrBlank() -> User(firstName, lastName, phone)
+                !phone.isNullOrBlank() -> User(firstName, lastName, phone, import = true)
                 !email.isNullOrBlank() && !password.isNullOrBlank() -> User(
                     firstName,
                     lastName,
