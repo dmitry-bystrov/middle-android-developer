@@ -62,7 +62,7 @@ class User private constructor(
         password: String
     ) : this(firstName, lastName, email = email, meta = mapOf("auth" to "password")) {
         println("Secondary mail constructor")
-        passwordHash = encrypt(password)
+        this.passwordHash = encrypt(password)
     }
 
     //for phone
@@ -85,7 +85,7 @@ class User private constructor(
     ) : this(firstName, lastName, email = email, meta = mapOf("src" to "csv")) {
         println("Secondary csv constructor")
         this.salt = salt
-        passwordHash = encrypt(password)
+        this.passwordHash = password
     }
 
     init {
