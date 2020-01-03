@@ -21,8 +21,12 @@ object UserHolder {
             }
     }
 
-    fun registerUserByPhone(fullName: String, rawPhone: String) : User {
-        if (!rawPhone.startsWith("+") || rawPhone.contains("[^+\\d( )\\-]".toRegex()) || rawPhone.replace("[^\\d]".toRegex(), "").length != 11)
+    fun registerUserByPhone(fullName: String, rawPhone: String): User {
+        if (!rawPhone.startsWith("+") || rawPhone.contains("[^+\\d( )\\-]".toRegex()) || rawPhone.replace(
+                "[^\\d]".toRegex(),
+                ""
+            ).length != 11
+        )
             throw IllegalArgumentException("Enter a valid phone number starting with a + and containing 11 digits")
 
         return User.makeUser(fullName, phone = rawPhone)
@@ -56,12 +60,32 @@ object UserHolder {
 
     private fun clearPhone(login: String) = login.replace("[^+\\d]".toRegex(), "")
 
-    fun requestAccessCode(login: String){
+    fun requestAccessCode(login: String) {
         map[clearPhone(login)]?.requestAccessCode()
     }
 
+    fun importUsers(list: List<String>): List<User> {
+        val result = mutableListOf<User>()
+        list.forEach { csv ->
+            result.add(importUser(csv))
+        }
+
+        return result
+    }
+
+    private fun importUser(csv: String): User {
+        return User.importUser(csv)
+            .also { user ->
+                if (map.containsKey(user.login)) {
+                    throw IllegalArgumentException("A user from this csv already exists")
+                } else {
+                    map[user.login] = user
+                }
+            }
+    }
+
     @VisibleForTesting(otherwise = VisibleForTesting.NONE)
-    fun clearHolder(){
+    fun clearHolder() {
         map.clear()
     }
 }

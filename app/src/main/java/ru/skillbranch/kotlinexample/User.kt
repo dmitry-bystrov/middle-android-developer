@@ -40,9 +40,14 @@ class User private constructor(
         }
         get() = _login!!
 
-    private val salt: String by lazy {
-        ByteArray(16).also { SecureRandom().nextBytes(it) }.toString()
-    }
+    private var salt: String? = null
+        get() {
+            if (field == null) {
+                field = ByteArray(16).also { SecureRandom().nextBytes(it) }.toString()
+            }
+
+            return field
+        }
 
     private lateinit var passwordHash: String
 
@@ -68,6 +73,19 @@ class User private constructor(
     ) : this(firstName, lastName, rawPhone = rawPhone, meta = mapOf("auth" to "sms")) {
         println("Secondary phone constructor")
         requestAccessCode()
+    }
+
+    //for csv
+    constructor(
+        firstName: String,
+        lastName: String?,
+        email: String?,
+        password: String,
+        salt: String?
+    ) : this(firstName, lastName, email = email, meta = mapOf("src" to "csv")) {
+        println("Secondary csv constructor")
+        this.salt = salt
+        passwordHash = encrypt(password)
     }
 
     init {
@@ -149,6 +167,28 @@ class User private constructor(
                     email,
                     password
                 )
+                else -> throw IllegalArgumentException("Email or phone must not be null or blank")
+            }
+        }
+
+        fun importUser(csv: String): User {
+            val params = csv.split(";")
+            val (firstName, lastName) = params[0].trim().fullNameToPair()
+            val email: String? = params.getOrNull(1)
+            val salt: String? = params.getOrNull(2)?.split(":")?.getOrNull(0)
+            val password: String? = params.getOrNull(2)?.split(":")?.getOrNull(1)
+            val phone: String? = params.getOrNull(3)
+
+            return when {
+                !phone.isNullOrBlank() -> User(firstName, lastName, phone)
+                !email.isNullOrBlank() && !password.isNullOrBlank() -> User(
+                    firstName,
+                    lastName,
+                    email,
+                    password,
+                    salt
+                )
+
                 else -> throw IllegalArgumentException("Email or phone must not be null or blank")
             }
         }
