@@ -1,4 +1,5 @@
 package ru.skillbranch.kotlinexample.extensions
 
-class Iterable {
+fun <T> List<T>.dropLastUntil(predicate: (T) -> Boolean): List<T> {
+    return this.take(indexOfLast(predicate))
 }
