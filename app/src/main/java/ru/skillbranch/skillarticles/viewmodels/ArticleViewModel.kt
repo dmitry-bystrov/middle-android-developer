@@ -19,6 +19,7 @@ class ArticleViewModel(private val articleId: String) :
                 shareLink = article.shareLink,
                 title = article.title,
                 category = article.category,
+                author = article.author,
                 categoryIcon = article.categoryIcon,
                 date = article.date.format()
             )
@@ -81,7 +82,7 @@ class ArticleViewModel(private val articleId: String) :
 
         toggleLike()
 
-        val msg = if (currentState.isLike) Notify.TextMessage("Mark as liked")
+        val msg = if (currentState.isLike) Notify.TextMessage("Mark is liked")
         else {
             Notify.ActionMessage(
                 "Don`t like it anymore",
@@ -114,7 +115,7 @@ class ArticleViewModel(private val articleId: String) :
     }
 
     override fun handleShare() {
-        val msg = "Share not implemented"
+        val msg = "Share is not implemented"
         notify(Notify.ErrorMessage(msg, "OK", null))
     }
 
